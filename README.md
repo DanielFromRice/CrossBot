@@ -1,6 +1,10 @@
 # CrossBot
 Discord bot for posting links to random crosswords
 
+
+To Run: Must have .env file in the directory containing bot token. Current active bot is in CrossBotClient.py
+
+
 CrossBot.py -> Bot to get crosswords using "Bot" class, uses prefix "+"
 
 CrossBotClient.py -> Uses the more general "Client" class, more customizability in how to scan messages, this is the code currently in use. Responds to "crosswords?" anywhere in message
