@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import random
 import re
+import sys
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -61,7 +62,7 @@ async def on_message(message):
                 EC.presence_of_element_located((By.CLASS_NAME, "chat--header--title"))
             )
         finally:
-            phrase = phrases[random.randint(0, num_phrases)]
+            phrase = phrases[random.randint(0, num_phrases-1)]
             response = f"{phrase}: \n {browser.current_url}"
         await message.channel.send(response)
         browser.quit()

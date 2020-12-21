@@ -1,0 +1,5 @@
+/.env
+/desktop.ini
+/geckodriver.exe
+/geckodriver.log
+/hello_batch.bat
