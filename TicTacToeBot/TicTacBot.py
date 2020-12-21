@@ -71,14 +71,8 @@ async def new_game(ctx, member_in: discord.Member):
         # await ctx.message.channel.send(f"Your opponent is {player2.id}")
         # await ctx.message.channel.send(f"Their username is {player2}")
         move_list = []
-        if game_data.keys().__contains__(str(player1.id)):
-            game_data[str(player1.id)][str(player2.id)] = { "moves": move_list, "turn": True, "sym": "X"}
-        else:
-            game_data[str(player1.id)] = {str(player2.id): {"moves": move_list, "turn": True, "sym": "X"}}
-        if game_data.keys().__contains__(str(player2.id)):
-            game_data[str(player2.id)][str(player1.id)] = {"moves": move_list, "turn": False, "sym": "O"}
-        else:
-            game_data[str(player2.id)] = {str(player1.id): {"moves": move_list, "turn": False, "sym": "O"}}
+        game_data[str(player1.id)] = {"opponent": str(player2.id), "moves": move_list, "turn": True, "sym": "X"}
+        game_data[str(player2.id)] = {"opponent": str(player1.id), "moves": move_list, "turn": False, "sym": "O"}
         print(game_data)
         await ctx.message.delete()
         img = TicTacToeGame.draw_game([])
@@ -106,11 +100,10 @@ async def new_game_error(ctx, err):
 
 
 @ticBot.command(name="play", help="Play your turn!")
-async def play(ctx, space: int, opp: discord.Member):
+async def play(ctx, space: int):
     player = ctx.message.author
 
-    if not game_data.keys().__contains__(str(player.id)) or not game_data.keys().__contains__(str(opp.id)) or not \
-            game_data[str(player.id)].keys().__contains__(str(opp.id)) or not game_data[str(opp.id)].keys().__contains__(str(player.id)):
+    if not game_data.keys().__contains__(str(player.id)) or game_data[str(player.id)] == {}:
         raise commands.MemberNotFound("No Game Active")
     if not game_data[str(player.id)]["turn"]:
         raise commands.BadBoolArgument("Not your turn")

@@ -72,9 +72,9 @@ def check_win(move_list):
 
 sample_game = [("X", 0), ("O", 3), ("X", 3), ("O", 8), ("X", 6)]
 
-test = draw_game(sample_game)
+# test = draw_game(sample_game)
 
-test.show()
+# test.show()
 
 # print(check_win(sample_game))
 
