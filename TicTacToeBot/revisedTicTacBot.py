@@ -10,7 +10,16 @@ import TicTacToeGame
 
 import json
 
+import logging
+
+logger = logging.getLogger('discord')
+logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler(filename='tic_tac_toe.log', encoding='utf-8', mode='w')
+handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+logger.addHandler(handler)
+
 load_dotenv()
+
 TOKEN = os.getenv('TIC_TAC_TOKEN')
 GUILD = os.getenv('GUILD_NAME')
 
@@ -21,7 +30,7 @@ ticBot = commands.Bot(command_prefix="XO.", intents=intents)
 game_data = {}
 # game_data{player : {opponent: (name), moves: [moves], turn: (bool), sym : (X or O)} }
 
-file = "test2.txt"
+file = "current_data.txt"
 
 
 async def index_files():
@@ -33,6 +42,7 @@ async def index_files():
         game_data = json_data
     else:
         game_data = {}
+    print(f"Game Data: {game_data}")
 
 
 async def write_data():
@@ -56,32 +66,36 @@ async def new_game(ctx, member_in: discord.Member):
     player2 = member_in
     if player1.id == player2.id:
         raise commands.BadArgument("Same")
-    elif str(player2.id) in game_data[str(player1.id)]:
-        raise commands.BadArgument("P1")
+    elif str(player1.id) in game_data.keys() and str(player2.id) in game_data[str(player1.id)]:
+            raise commands.BadArgument("P1")
+
+    # await ctx.message.channel.send(f"You are person {player1.id}")
+    # await ctx.message.channel.send(f"Your username is {player1}")
+    # await ctx.message.channel.send(f"Your opponent is {player2.id}")
+    # await ctx.message.channel.send(f"Their username is {player2}")
+    move_list = []
+    print("HI0")
+    if game_data.keys().__contains__(str(player1.id)):
+    # if str(player1.id) in game_data.keys():
+        print("Hi1")
+        game_data[str(player1.id)][str(player2.id)] = { "moves": move_list, "turn": True, "sym": "X"}
     else:
-        # await ctx.message.channel.send(f"You are person {player1.id}")
-        # await ctx.message.channel.send(f"Your username is {player1}")
-        # await ctx.message.channel.send(f"Your opponent is {player2.id}")
-        # await ctx.message.channel.send(f"Their username is {player2}")
-        move_list = []
-        if game_data.keys().__contains__(str(player1.id)):
-            game_data[str(player1.id)][str(player2.id)] = { "moves": move_list, "turn": True, "sym": "X"}
-        else:
-            game_data[str(player1.id)] = {str(player2.id): {"moves": move_list, "turn": True, "sym": "X"}}
-        if game_data.keys().__contains__(str(player2.id)):
-            game_data[str(player2.id)][str(player1.id)] = {"moves": move_list, "turn": False, "sym": "O"}
-        else:
-            game_data[str(player2.id)] = {str(player1.id): {"moves": move_list, "turn": False, "sym": "O"}}
-        print(game_data)
-        await ctx.message.delete()
-        img = TicTacToeGame.draw_game([])
-        with io.BytesIO() as image_binary:
-            img.save(image_binary, 'PNG')
-            image_binary.seek(0)
-            await ctx.send("----------------------------------------------")
-            await ctx.send(f"New Game! {player1} is X's, {player2} is O's.")
-            await ctx.send(file=discord.File(fp=image_binary, filename='latest_turn.png'))
-            await ctx.send(f"{player1}, it is your turn!")
+        print("Hi2")
+        game_data[str(player1.id)] = {str(player2.id): {"moves": move_list, "turn": True, "sym": "X"}}
+    if game_data.keys().__contains__(str(player2.id)):
+        game_data[str(player2.id)][str(player1.id)] = {"moves": move_list, "turn": False, "sym": "O"}
+    else:
+        game_data[str(player2.id)] = {str(player1.id): {"moves": move_list, "turn": False, "sym": "O"}}
+    print(game_data)
+    await ctx.message.delete()
+    img = TicTacToeGame.draw_game([])
+    with io.BytesIO() as image_binary:
+        img.save(image_binary, 'PNG')
+        image_binary.seek(0)
+        await ctx.send("----------------------------------------------")
+        await ctx.send(f"New Game! {player1} is X's, {player2} is O's.")
+        await ctx.send(file=discord.File(fp=image_binary, filename='latest_turn.png'))
+        await ctx.send(f"{player1}, it is your turn!")
 
 
 @new_game.error
@@ -100,8 +114,6 @@ async def new_game_error(ctx, err):
 @ticBot.command(name="play", help="Play your turn!")
 async def play(ctx, space: int, opponent: discord.Member):
     player = ctx.message.author
-
-    await ctx.send("Made it here....")
 
     if not game_data.keys().__contains__(str(player.id)) or not game_data.keys().__contains__(str(opponent.id)) or not \
             game_data[str(player.id)].keys().__contains__(str(opponent.id)) or not game_data[str(opponent.id)].keys().__contains__(str(player.id)):
