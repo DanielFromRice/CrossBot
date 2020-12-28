@@ -81,12 +81,13 @@ def draw_game(moves_list, sectors):
             make_o(board, drawer, int(sec), int(loc), o_pen)
         elif player == 'X':
             make_x(board, drawer, int(sec), int(loc), x_pen)
-    last_p, last_s, last_l = moves_list[len(moves_list) - 1]
-    last_pen = ImageDraw2.Pen("gold", width = 7)
-    if last_p == "X":
-        make_x(board, drawer, int(last_s), int(last_l), x_pen)
-    else:
-        make_o(board, drawer, int(last_s), int(last_l), last_pen)
+    if len(moves_list) > 0:
+        last_p, last_s, last_l = moves_list[len(moves_list) - 1]
+        last_pen = ImageDraw2.Pen("gold", width = 7)
+        if last_p == "X":
+            make_x(board, drawer, int(last_s), int(last_l), last_pen)
+        else:
+            make_o(board, drawer, int(last_s), int(last_l), last_pen)
     # TODO: change last coloring to background fill instead of the move
     return board
 
@@ -102,6 +103,7 @@ def check_win(move_list):
             x_spaces.add(int(space)+1)
         elif player == 'O':
             o_spaces.add(int(space)+1)
+    print(f"X's: {x_spaces}, O's: {o_spaces}")
     for win_cond in win_list:
         if win_cond.issubset(x_spaces):
             return "X"

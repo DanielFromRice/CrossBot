@@ -24,12 +24,12 @@ GUILD = os.getenv('GUILD_NAME')
 
 intents = discord.Intents.default()
 intents.members = True
-ticBot = commands.Bot(command_prefix="XO.", intents=intents)
+ticBot = commands.Bot(command_prefix="xo ", intents=intents)
 
 game_data = {}
 # game_data{player : {opponent: (name), moves: [moves], turn: (bool), sym : (X or O)} }
 
-file = "ultTest1.txt"
+file = "ultimate_data.txt"
 
 
 async def index_files():
@@ -55,6 +55,7 @@ async def on_ready():
     print(f'{ticBot.user} has connected to Discord on the following guilds:')
     for guild in ticBot.guilds:
         print(f'{guild.name}  (id: {guild.id})')
+    # await ticBot.change_presence(activity=discord.Game(name="a game"))
 
 
 @ticBot.command(name="new", help="Start a new Tic Tac Toe Game")
@@ -83,7 +84,8 @@ async def new_game(ctx, member_in: discord.Member):
             game_data[str(player2.id)] = {str(player1.id): {"moves": move_list, "turn": False, "sym": "O", "secs": sector_statuses}}
         print(game_data)
         await ctx.message.delete()
-        img = UltimateGame.draw_game([], sector_statuses)
+        img = UltimateGame.draw_game(move_list, sector_statuses)
+        print("I MADE IT")
         with io.BytesIO() as image_binary:
             img.save(image_binary, 'PNG')
             image_binary.seek(0)
@@ -133,19 +135,23 @@ async def play(ctx, sector: int, space: int, opponent: discord.Member):
                 raise commands.ArgumentParsingError("Wrong Sector")
             if (space - 1) in used_spaces:
                 raise commands.ArgumentParsingError("Used Space")
-
+    print("made it 0")
     moves.append([game_data[str(player.id)][str(opponent.id)]['sym'], sector - 1, space - 1])
     changed_sector = [[move[0], move[2]] for move in moves if move[1] == sector - 1]
     sector_win = UltimateGame.check_win(changed_sector)
     winner = "N"
+    print("made it a")
     if sector_win != "N":
         game_data[str(player.id)][str(opponent.id)]["secs"][sector - 1] = sector_win
         game_data[str(opponent.id)][str(player.id)]["secs"][sector - 1] = sector_win
-        sector_list = [[sym, sec] for sec, sym in game_data[str(player.id)][str(opponent.id)]["secs"] if sym != "N"]
-        print(sector_list)
+        print("made it b")
+        sector_list = [[sym, sec] for sec, sym in game_data[str(player.id)][str(opponent.id)]["secs"].items() if sym != "N"]
+        # print("SECTORS")
         winner = UltimateGame.check_win(sector_list)
-
+        # print(winner)
+    print("made it c")
     if winner == "N":
+        print("made it 1")
         img = UltimateGame.draw_game(moves, game_data[str(player.id)][str(opponent.id)]["secs"])
         with io.BytesIO() as image_binary:
             img.save(image_binary, 'PNG')
@@ -153,6 +159,7 @@ async def play(ctx, sector: int, space: int, opponent: discord.Member):
             await ctx.send(f"----------------------------------------------")
             await ctx.send(f"{ctx.message.author} just played an {game_data[str(player.id)][str(opponent.id)]['sym']}!", file=discord.File(fp=image_binary, filename='latest_turn.png'))
             await ctx.send(f"{opponent}, it is your turn!")
+        print("made it 2")
         await ctx.message.delete()
         game_data[str(player.id)][str(opponent.id)]["turn"] = False
         game_data[str(opponent.id)][str(player.id)]["turn"] = True
@@ -187,6 +194,7 @@ async def play_error(ctx, err):
     else:
         await ctx.send(f"Something went wrong, sorry.....")
         print(type(err))
+        print(err)
 
 
 @ticBot.command(name="game_info", help="Current information about your active game")
